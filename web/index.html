@@ -168,13 +168,19 @@
 
             <!-- Tabs -->
             <div class="tabs">
-                <button class="tab-btn active" data-tab="claims">Claims & Evidence</button>
+                <button class="tab-btn active" data-tab="summary">Executive Summary</button>
+                <button class="tab-btn" data-tab="claims">Claims & Evidence</button>
                 <button class="tab-btn" data-tab="questions">Investor Questions</button>
                 <button class="tab-btn" data-tab="email">Email Template</button>
             </div>
 
+            <!-- Summary Tab -->
+            <div id="summaryTab" class="tab-content active">
+                <div id="summaryContent" class="summary-content"></div>
+            </div>
+
             <!-- Claims Tab -->
-            <div id="claimsTab" class="tab-content active">
+            <div id="claimsTab" class="tab-content">
                 <div id="claimsList" class="claims-list"></div>
             </div>
 
