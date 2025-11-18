@@ -380,10 +380,30 @@ After:  "What is the methodology behind your 300% YoY revenue growth claim?
 |-----------|-----------|---------|
 | **Backend** | Python 3.13 + Flask | REST API server |
 | **Frontend** | HTML/CSS/JavaScript | Web UI |
+| **Workflow Engine** | LangGraph | Agent orchestration & state management |
 | **LLM** | Google Gemini | Claim extraction & verification |
 | **Search** | SerpAPI | Web evidence retrieval |
 | **Database** | SQLite | Deal storage & similarity matching |
 | **PDF Processing** | pypdf | Text extraction |
+
+### LangGraph Workflow Architecture
+
+The analysis pipeline uses **LangGraph** for orchestrating the multi-step agent workflow:
+
+```
+1. generate_pitch_deck_summary → Extract company info (parallel start)
+2. extract_claims → Identify verifiable claims from deck
+3. verify_claims → Search SerpAPI + verify each claim with LLM
+4. generate_questions → Create context-aware investor questions
+5. compose_email → Generate personalized email template
+6. generate_executive_summary → Create final analysis report
+```
+
+**Benefits:**
+- **State Management**: Shared state across all nodes (text, claims, evidence, questions)
+- **Error Handling**: Graceful fallbacks when API calls fail
+- **Modularity**: Each step is an independent, testable function
+- **Flexibility**: Easy to add new nodes or modify the workflow graph
 
 ---
 
