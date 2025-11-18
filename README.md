@@ -41,6 +41,10 @@ This project is built on three fundamental principles:
 ### 1. Install & Configure
 
 ```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
 # Install dependencies
 pip install -r requirements.txt
 
@@ -397,6 +401,40 @@ After:  "What is the methodology behind your 300% YoY revenue growth claim?
 - [ ] Slack bot (listen for uploads in #deal-flow)
 - [ ] Vector embeddings (Pinecone/Weaviate for semantic search)
 - [ ] Proactive monitoring (re-verify claims when new evidence appears)
+
+---
+
+## Recent Improvements (November 2025)
+
+### Bug Fixes & Enhancements
+
+**Fixed Critical JSON Parsing Issue:**
+- Added `clean_json_response()` helper function to handle Gemini's markdown-wrapped JSON responses
+- Applied fix across all modules: `workflow.py`, `agent.py`, `verifier.py`
+- Pitch deck summary now extracts correctly (previously showed "Not specified")
+- Claims extraction now working properly (8+ claims extracted per typical pitch deck)
+- All LLM response parsing now handles markdown code blocks (` ```json ... ``` `)
+
+**Improved LangGraph Workflow:**
+- Enhanced error handling with descriptive error messages
+- Better claim filtering to avoid extracting slide formatting text
+- Verified evidence extraction through SerpAPI (filters mock/placeholder data)
+- Context-aware investor questions (no generic "provide documents" questions)
+- Executive summary generation with real analysis insights
+
+**Test Results:**
+- ✅ Pitch deck summary extraction: Working
+- ✅ Claims extraction: 8+ claims per deck
+- ✅ Evidence verification: Real SerpAPI results
+- ✅ Investor questions: Context-aware and specific
+- ✅ Executive summary: Proper analysis with recommendations
+- ✅ Email template: Includes company context and statistics
+
+**How to Test:**
+```bash
+source venv/bin/activate
+python -m diligent_ai.cli example/sample.pdf --config .config.yaml
+```
 
 ---
 

@@ -3,6 +3,18 @@ import json
 from .llm_client import LLMClient
 
 
+def clean_json_response(response: str) -> str:
+    """Clean LLM response by removing markdown code blocks."""
+    cleaned = response.strip()
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[7:]
+    elif cleaned.startswith("```"):
+        cleaned = cleaned[3:]
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3]
+    return cleaned.strip()
+
+
 def generate_pitch_deck_summary(text: str, llm: LLMClient) -> Dict[str, Any]:
     """Generate a summary of the pitch deck content.
 
@@ -34,7 +46,7 @@ Return ONLY the JSON object, no additional text.
 
     try:
         resp = llm.generate(prompt)
-        data = json.loads(resp)
+        data = json.loads(clean_json_response(resp))
         return {
             "company_name": data.get("company_name", "Not specified"),
             "product": data.get("product", "Not specified"),
@@ -116,7 +128,7 @@ Return ONLY the JSON object, no additional text.
 
     try:
         resp = llm.generate(prompt)
-        data = json.loads(resp)
+        data = json.loads(clean_json_response(resp))
         summary = {
             "overview": data.get("overview", "Analysis complete."),
             "key_findings": data.get("key_findings", []),
@@ -216,7 +228,7 @@ Return ONLY the JSON object, no additional text.
 
     resp = llm.generate(prompt)
     try:
-        data = json.loads(resp)
+        data = json.loads(clean_json_response(resp))
         return data.get("questions", [])
     except Exception:
         # Improved fallback questions based on claim analysis

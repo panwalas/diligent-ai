@@ -4,6 +4,18 @@ from .llm_client import LLMClient
 from .evidence import search_serpapi
 
 
+def clean_json_response(response: str) -> str:
+    """Clean LLM response by removing markdown code blocks."""
+    cleaned = response.strip()
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[7:]
+    elif cleaned.startswith("```"):
+        cleaned = cleaned[3:]
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3]
+    return cleaned.strip()
+
+
 def extract_claims_from_text(text: str, llm: LLMClient) -> List[Dict[str, Any]]:
     prompt = f"""
 You are an expert analyst reviewing a startup pitch deck. Extract ONLY verifiable, specific CLAIMS from the following pitch deck text.
@@ -39,7 +51,7 @@ Return ONLY the JSON object with valid claims, no additional text. If no valid c
 """
     resp = llm.generate(prompt)
     try:
-        data = json.loads(resp)
+        data = json.loads(clean_json_response(resp))
         claims = data.get("claims", [])
 
         # Additional filtering: remove very short or very long "claims"
@@ -77,7 +89,7 @@ Please answer with a JSON object including: claim, status (verified|unverified|d
 """
     resp = llm.generate(prompt)
     try:
-        data = json.loads(resp)
+        data = json.loads(clean_json_response(resp))
         # attach scraped evidence if LLM didn't provide any
         if not data.get("evidence") and evidence_items:
             data["evidence"] = [{"source": e.get("source"), "url": e.get("url"), "snippet": e.get("snippet") or e.get("title")} for e in evidence_items]

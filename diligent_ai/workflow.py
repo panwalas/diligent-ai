@@ -16,6 +16,18 @@ from .llm_client import LLMClient
 from .evidence import search_serpapi
 
 
+def clean_json_response(response: str) -> str:
+    """Clean LLM response by removing markdown code blocks."""
+    cleaned = response.strip()
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[7:]
+    elif cleaned.startswith("```"):
+        cleaned = cleaned[3:]
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3]
+    return cleaned.strip()
+
+
 class AnalysisState(TypedDict):
     """State for the analysis workflow."""
     # Input
@@ -62,7 +74,7 @@ Return ONLY the JSON object, no additional text.
 
     try:
         resp = llm.generate(prompt)
-        data = json.loads(resp)
+        data = json.loads(clean_json_response(resp))
         state["pitch_deck_summary"] = {
             "company_name": data.get("company_name", "Not specified"),
             "product": data.get("product", "Not specified"),
@@ -71,7 +83,8 @@ Return ONLY the JSON object, no additional text.
             "market": data.get("market", "Not specified"),
             "traction": data.get("traction", "Not specified")
         }
-    except Exception:
+    except Exception as e:
+        print(f"Error parsing pitch deck summary: {e}")
         state["pitch_deck_summary"] = {
             "company_name": "Not specified",
             "product": "Product information could not be extracted from the pitch deck.",
@@ -124,7 +137,7 @@ Return ONLY the JSON object with valid claims, no additional text. If no valid c
 
     resp = llm.generate(prompt)
     try:
-        data = json.loads(resp)
+        data = json.loads(clean_json_response(resp))
         claims = data.get("claims", [])
 
         # Additional filtering: remove very short or very long "claims"
@@ -140,7 +153,8 @@ Return ONLY the JSON object with valid claims, no additional text. If no valid c
                         filtered_claims.append(claim)
 
         state["claims"] = filtered_claims
-    except Exception:
+    except Exception as e:
+        print(f"Error extracting claims: {e}")
         # Fallback: try to extract from longer sentences only
         sentences = [s.strip() for s in text.split(".") if s.strip()]
         valid_sentences = [s for s in sentences if 20 <= len(s) <= 300 and len(s.split()) >= 4]
@@ -193,7 +207,7 @@ Return ONLY the JSON object, no additional text.
 
             try:
                 resp = llm.generate(verification_prompt)
-                data = json.loads(resp)
+                data = json.loads(clean_json_response(resp))
                 # Attach real evidence
                 if not data.get("evidence"):
                     data["evidence"] = [{
@@ -286,7 +300,7 @@ Return ONLY the JSON object, no additional text.
 
     try:
         resp = llm.generate(prompt)
-        data = json.loads(resp)
+        data = json.loads(clean_json_response(resp))
         questions = data.get("questions", [])
 
         # Filter out bad questions
@@ -430,7 +444,7 @@ Return ONLY the JSON object, no additional text.
 
     try:
         resp = llm.generate(prompt)
-        data = json.loads(resp)
+        data = json.loads(clean_json_response(resp))
         summary = {
             "overview": data.get("overview", "Analysis complete."),
             "key_findings": data.get("key_findings", []),
