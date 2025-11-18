@@ -6,6 +6,38 @@ Automatically verify pitch deck claims, find similar past deals, and generate pe
 
 ---
 
+## Sample Inputs and Outputs
+
+Below are screenshots from a real analysis run, showing the complete workflow from input to final email template.
+
+### Input Screen
+![Input Screen](example/img/input_screen.png)
+*Upload a pitch deck PDF or paste a Google Drive link to start the analysis*
+
+### Analysis Process
+![Sample Run](example/img/sample_run.png)
+*Real-time progress tracking through the 4-step verification process*
+
+### Report Overview
+![Report Overview](example/img/report_overview.png)
+*Executive summary with key findings, risk assessment, and recommendation*
+
+### Detailed Analysis
+![Deck Summary](example/img/deck_summary.png)
+*AI-generated company summary extracted from the pitch deck*
+
+![Claims and Evidence](example/img/claims_and_evidence.png)
+*Verified claims with supporting evidence from high-quality sources*
+
+![Key Findings and Risk Assessment](example/img/key_findings_and_risk_assestment.png)
+*Structured analysis with identified risks and investment recommendation*
+
+### Email Template
+![Email Template](example/img/Email_template.png)
+*Auto-generated professional email with context-aware investor questions*
+
+---
+
 ## Core Design Principles
 
 This project is built on three fundamental principles:
