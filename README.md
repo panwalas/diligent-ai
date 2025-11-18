@@ -10,25 +10,21 @@ Automatically verify pitch deck claims, find similar past deals, and generate pe
 
 This project is built on three fundamental principles:
 
-### 1. Seamless Integration — No New Apps Required
+### 1. Seamless Integration —> No New Apps Required
 
 **Implemented:**
 - **Google Drive**: Paste a shared link, get instant verification
 - **Web UI**: Drag-drop files or paste Drive links in your browser
 - **CLI**: Command-line interface for automation
 
-**Roadmap:** Gmail bot, Slack bot (see [ROADMAP.md](ROADMAP.md))
-
-### 2. Hyper-Personalization — Context-Aware Intelligence
+### 2. Hyper-Personalization —> Context-Aware Intelligence
 
 **Implemented:**
 - **Memory Agent**: Automatically stores all analyzed pitch decks
 - **Similar Deals**: Shows top 3 similar past deals with comparison metrics
 - **Smart Context**: "You reviewed a similar fintech pitch 2 weeks ago with 80% verification rate"
 
-**Roadmap:** Vector embeddings, pattern recognition (see [ROADMAP.md](ROADMAP.md))
-
-### 3. True Agency — Execution, Not Just Data
+### 3. True Agency —> Execution, Not Just Data
 
 **Implemented:**
 - Automatically verifies all claims using web evidence
@@ -36,7 +32,7 @@ This project is built on three fundamental principles:
 - Composes ready-to-send email templates
 - Stores deals in memory without user intervention
 
-**Roadmap:** Auto-send emails, proactive monitoring (see [ROADMAP.md](ROADMAP.md))
+**Roadmap:** Gmail bot, Slack bot, Auto-send emails, proactive monitoring, Vector embeddings, pattern recognition (see [ROADMAP.md](ROADMAP.md))
 
 ---
 
@@ -255,36 +251,6 @@ curl http://localhost:5000/api/stats
 - Similar deals surfaced with each new analysis
 - Can query: "Show me all fintech deals with unverified revenue claims"
 - Identifies patterns: "Companies with 80%+ verification rate had 3x higher investment success"
-
----
-
-## Testing
-
-### Run Unit Tests
-
-```bash
-PYTHONPATH=. python -m pytest tests/ -v
-```
-
-### Manual Testing Checklist
-
-**Google Drive Integration:**
-- [ ] Upload PDF to Google Drive
-- [ ] Share with "Anyone with the link can view"
-- [ ] Paste link in web UI → Analyze
-- [ ] Verify claims, evidence, questions appear
-- [ ] Check "Similar Deals" section (after 2nd deck)
-
-**Memory Agent:**
-- [ ] Analyze deck #1 → No similar deals shown
-- [ ] Analyze deck #2 → Similar deals section appears
-- [ ] Verify similarity percentage makes sense
-- [ ] Check verification rate comparison
-
-**API Endpoints:**
-- [ ] `GET /api/deals` returns all deals
-- [ ] `GET /api/deals/1` returns specific deal
-- [ ] `GET /api/stats` returns correct counts
 
 ---
 
