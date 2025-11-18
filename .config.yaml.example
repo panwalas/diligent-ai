@@ -1,0 +1,26 @@
+### Diligent AI Configuration
+# API keys and user preferences
+
+gemini:
+  # Your Gemini API key from Google AI Studio
+  api_key: "YOUR_GEMINI_API_KEY_HERE"
+  # Model name to use (e.g., gemini-2.0-flash-exp, gemini-pro)
+  model: "gemini-2.5-flash"
+
+search:
+  # SerpAPI key for web evidence retrieval (https://serpapi.com)
+  serpapi_key: "YOUR_SERPAPI_KEY_HERE"
+
+google:
+  # Optional: Gmail/Drive OAuth credentials for future integration
+  client_id: ""
+  client_secret: ""
+
+user:
+  # Investor personalization profile
+  preferred_sources:
+    - "crunchbase"
+    - "news"
+  industries:
+    - "saas"
+    - "fintech"

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diligent AI - Pitch Deck Due Diligence</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="8" fill="#4F46E5"/>
+                    <path d="M16 8L23 12V20L16 24L9 20V12L16 8Z" fill="white"/>
+                </svg>
+                <h1>Diligent AI</h1>
+            </div>
+            <p class="tagline">AI-Powered Pitch Deck Due Diligence</p>
+        </header>
+
+        <!-- Upload Section -->
+        <div id="uploadSection" class="section upload-section">
+            <div class="upload-area" id="uploadArea">
+                <svg class="upload-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <h2>Upload Pitch Deck</h2>
+                <p>Drop your PDF here or click to browse</p>
+                <input type="file" id="fileInput" accept=".pdf" hidden>
+                <button class="btn btn-primary" id="browseBtn">Browse Files</button>
+            </div>
+
+            <div class="options">
+                <div class="input-group">
+                    <label for="founderEmail">Founder Email (Optional)</label>
+                    <input type="email" id="founderEmail" placeholder="founder@startup.com">
+                </div>
+                <div class="input-group">
+                    <label for="investorName">Your Name/Firm</label>
+                    <input type="text" id="investorName" placeholder="Jane Smith @ Acme Ventures" value="Investor">
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Section -->
+        <div id="processingSection" class="section processing-section" style="display: none;">
+            <div class="processing-animation">
+                <div class="spinner"></div>
+                <div class="pulse-ring"></div>
+            </div>
+            <h2 id="processingTitle">Analyzing Pitch Deck</h2>
+            <p id="processingStep" class="processing-step"></p>
+
+            <div class="progress-steps">
+                <div class="step" data-step="1">
+                    <div class="step-icon">📄</div>
+                    <div class="step-label">Extracting Text</div>
+                    <div class="step-status">Pending</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-icon">🔍</div>
+                    <div class="step-label">Finding Claims</div>
+                    <div class="step-status">Pending</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-icon">✓</div>
+                    <div class="step-label">Verifying Facts</div>
+                    <div class="step-status">Pending</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-icon">❓</div>
+                    <div class="step-label">Generating Questions</div>
+                    <div class="step-status">Pending</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="section results-section" style="display: none;">
+            <div class="results-header">
+                <h2>Due Diligence Report</h2>
+                <div class="results-actions">
+                    <button class="btn btn-secondary" id="downloadBtn">Download Report</button>
+                    <button class="btn btn-primary" id="newAnalysisBtn">New Analysis</button>
+                </div>
+            </div>
+
+            <!-- Summary Stats -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalClaims">0</div>
+                    <div class="stat-label">Claims Analyzed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="verifiedClaims">0</div>
+                    <div class="stat-label">Verified</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="unverifiedClaims">0</div>
+                    <div class="stat-label">Needs Review</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="questionsGenerated">0</div>
+                    <div class="stat-label">Questions</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="claims">Claims & Evidence</button>
+                <button class="tab-btn" data-tab="questions">Investor Questions</button>
+                <button class="tab-btn" data-tab="email">Email Template</button>
+            </div>
+
+            <!-- Claims Tab -->
+            <div id="claimsTab" class="tab-content active">
+                <div id="claimsList" class="claims-list"></div>
+            </div>
+
+            <!-- Questions Tab -->
+            <div id="questionsTab" class="tab-content">
+                <div id="questionsList" class="questions-list"></div>
+            </div>
+
+            <!-- Email Tab -->
+            <div id="emailTab" class="tab-content">
+                <div class="email-preview">
+                    <pre id="emailContent"></pre>
+                    <button class="btn btn-primary" id="copyEmailBtn">Copy to Clipboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

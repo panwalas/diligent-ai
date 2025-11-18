@@ -1,0 +1,9 @@
+# Minimal requirements for the Diligent AI MVP
+PyYAML>=6.0
+requests>=2.28
+# PDF extraction (pypdf is the maintained fork of PyPDF2)
+pypdf>=5.1.0
+# Google Gemini AI SDK
+google-genai>=0.2.0
+# Web server
+Flask>=2.3.0
