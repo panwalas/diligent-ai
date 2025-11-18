@@ -5,7 +5,7 @@ import sys
 from .pdf_utils import extract_text_from_pdf, extract_slide_texts
 from .llm_client import LLMClient
 from .verifier import extract_claims_from_text, verify_claims
-from .agent import generate_questions, compose_email
+from .agent import generate_questions, compose_email, generate_summary
 from .config import load_config
 
 # Configure logging
@@ -51,13 +51,21 @@ def run(pdf_path: str, config_path: str = None, founder_email: str = None, inves
         logger.info(f"Extracted {len(claims)} claims. Verifying...")
 
         verified = verify_claims(claims, llm, cfg_path=config_path)
-        logger.info("Verification complete. Generating investor questions...")
+        logger.info("Verification complete. Generating summary and investor questions...")
+
+        summary = generate_summary(verified, llm)
+        logger.info("Summary generated. Generating questions...")
 
         questions = generate_questions(verified, llm, user_profile=cfg.get("user"))
 
-        email = compose_email(questions, founder_email or "founder@example.com", investor_name)
+        email = compose_email(questions, founder_email or "founder@example.com", investor_name, summary=summary)
 
-        report = {"claims": verified, "questions": questions, "email": email}
+        report = {
+            "summary": summary,
+            "claims": verified,
+            "questions": questions,
+            "email": email
+        }
 
         # Output JSON to stdout (only when running from CLI)
         if print_output:

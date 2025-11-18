@@ -6,10 +6,29 @@ from .evidence import search_serpapi
 
 def extract_claims_from_text(text: str, llm: LLMClient) -> List[Dict[str, Any]]:
     prompt = f"""
-Extract claims from the following pitch deck text. Return a JSON object with a top-level key 'claims' as an array of objects with id and text.
+You are an expert analyst reviewing a startup pitch deck. Extract ONLY verifiable, specific claims from the following pitch deck text.
 
+Focus on claims that are:
+- Quantitative (metrics, numbers, percentages, growth rates)
+- Strategic (partnerships, customers, market position, achievements)
+- Factual statements that can be verified with external evidence
+- Material to investment decisions
+
+EXCLUDE:
+- Vague statements or opinions
+- Future projections without supporting data
+- Marketing language or hyperbole
+- Generic industry statements
+
+Return a JSON object with a top-level key 'claims' as an array of objects. Each claim object should have:
+- id: unique identifier (e.g., "c1", "c2")
+- text: the specific claim
+- category: one of ["financial", "customer", "market", "product", "team", "partnership"]
+
+Pitch deck text:
 {text}
 
+Return ONLY the JSON object, no additional text.
 """
     resp = llm.generate(prompt)
     try:
@@ -17,7 +36,7 @@ Extract claims from the following pitch deck text. Return a JSON object with a t
         return data.get("claims", [])
     except Exception:
         sentences = [s.strip() for s in text.split(".") if s.strip()][:10]
-        return [{"id": f"c{i+1}", "text": s} for i, s in enumerate(sentences)]
+        return [{"id": f"c{i+1}", "text": s, "category": "unknown"} for i, s in enumerate(sentences)]
 
 
 def verify_claim(claim: Dict[str, Any], llm: LLMClient, cfg_path: str = None) -> Dict[str, Any]:

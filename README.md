@@ -56,7 +56,7 @@ cd web
 python server.py
 ```
 
-Open: **http://localhost:5000**
+Open: **http://localhost:8000**
 
 ### 3. Test Google Drive Integration
 
@@ -80,19 +80,25 @@ Input (PDF or Drive Link)
     ↓
 1. Extract text from PDF
     ↓
-2. Identify claims (revenue, users, team, market, traction)
+2. Identify verifiable claims using AI agent
+   (Filters out opinions, marketing language, and vague statements)
     ↓
 3. Search web for evidence (SerpAPI)
+   (Filters low-quality sources like social media)
     ↓
 4. Verify claims with LLM (Gemini) + confidence scores
     ↓
-5. Find similar past deals (Memory Agent)
+5. Generate executive summary
+   (Overview, key findings, risk assessment, recommendation)
     ↓
-6. Generate investor questions
+6. Find similar past deals (Memory Agent)
     ↓
-7. Compose email template
+7. Generate intelligent investor questions
+   (Context-aware, not generic "provide documents" questions)
     ↓
-Output: Full verification report + similar deals
+8. Compose professional email template
+    ↓
+Output: Executive summary + verified claims + questions + email
 ```
 
 ---
@@ -103,15 +109,18 @@ Output: Full verification report + similar deals
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| **PDF Upload** | Working | Drag-drop or browse for files |
-| **Google Drive** | Working | Paste Drive link for instant verification |
-| **Claim Verification** | Working | Auto-verifies with web evidence + confidence scores |
-| **Memory Agent** | Working | Stores all deals in SQLite, finds similar matches |
-| **Similar Deals** | Working | Shows top 3 similar past deals with comparison |
-| **Question Generation** | Working | Personalized questions based on verification results |
-| **Email Template** | Working | Ready-to-send email with questions |
-| **Web UI** | Working | Beautiful interface with real-time progress |
-| **REST API** | Working | `/api/analyze`, `/api/deals`, `/api/stats` |
+| **PDF Upload** | ✅ Working | Drag-drop or browse for files |
+| **Google Drive** | ✅ Working | Paste Drive link for instant verification |
+| **AI Claim Extraction** | ✅ Enhanced | Intelligent filtering of verifiable claims (excludes opinions & marketing) |
+| **Evidence Filtering** | ✅ New | Filters low-quality sources (social media, personal blogs) |
+| **Executive Summary** | ✅ New | Auto-generated overview, findings, risks, and recommendation |
+| **Claim Verification** | ✅ Working | Auto-verifies with web evidence + confidence scores |
+| **Memory Agent** | ✅ Working | Stores all deals in SQLite, finds similar matches |
+| **Similar Deals** | ✅ Working | Shows top 3 similar past deals with comparison |
+| **Smart Questions** | ✅ Enhanced | Context-aware questions (not generic "provide documents") |
+| **Email Template** | ✅ Enhanced | Professional, personalized email with analysis context |
+| **Web UI** | ✅ Working | Beautiful interface with summary tab + real-time progress |
+| **REST API** | ✅ Working | `/api/analyze`, `/api/deals`, `/api/stats` |
 
 ### Architecture
 
@@ -149,7 +158,7 @@ Analyze a pitch deck (file upload or Google Drive link).
 
 **Request (File Upload):**
 ```bash
-curl -X POST http://localhost:5000/api/analyze \
+curl -X POST http://localhost:8000/api/analyze \
   -F "pdf=@deck.pdf" \
   -F "founder_email=founder@startup.com" \
   -F "investor_name=Jane Smith"
@@ -157,7 +166,7 @@ curl -X POST http://localhost:5000/api/analyze \
 
 **Request (Google Drive):**
 ```bash
-curl -X POST http://localhost:5000/api/analyze \
+curl -X POST http://localhost:8000/api/analyze \
   -H "Content-Type: application/json" \
   -d '{
     "drive_link": "https://drive.google.com/file/d/FILE_ID/view",
@@ -169,16 +178,43 @@ curl -X POST http://localhost:5000/api/analyze \
 **Response:**
 ```json
 {
+  "summary": {
+    "overview": "Analyzed 12 claims with 75% verification rate...",
+    "key_findings": [
+      "Revenue claims verified with public sources",
+      "Customer count could not be independently verified"
+    ],
+    "risk_assessment": "Moderate risk due to unverified customer claims",
+    "recommendation": "Proceed with Due Diligence",
+    "statistics": {
+      "total_claims": 12,
+      "verified": 9,
+      "unverified": 3,
+      "disputed": 0,
+      "average_confidence": 0.75
+    }
+  },
   "claims": [
     {
       "claim": "We have 500 enterprise customers",
       "status": "verified",
       "confidence": 0.9,
-      "evidence": [...]
+      "category": "customer",
+      "evidence": [
+        {
+          "source": "web",
+          "url": "https://techcrunch.com/...",
+          "snippet": "The company announced 500+ customers...",
+          "quality_score": 3
+        }
+      ]
     }
   ],
-  "questions": ["Can you provide customer references?", ...],
-  "email": "Dear founder,\n\nFollowing our review...",
+  "questions": [
+    "Regarding 'We have 500 enterprise customers' - can you share specific customer names and contact information for reference checks?",
+    "What is the methodology behind your revenue projections and growth metrics?"
+  ],
+  "email": "Dear Founder,\n\nThank you for sharing your pitch deck...",
   "similar_deals": [
     {
       "company_name": "Similar Corp",
@@ -195,7 +231,7 @@ curl -X POST http://localhost:5000/api/analyze \
 List all analyzed deals (paginated).
 
 ```bash
-curl http://localhost:5000/api/deals?limit=20&offset=0
+curl http://localhost:8000/api/deals?limit=20&offset=0
 ```
 
 ### `GET /api/deals/<id>`
@@ -203,7 +239,7 @@ curl http://localhost:5000/api/deals?limit=20&offset=0
 Get full details for a specific deal.
 
 ```bash
-curl http://localhost:5000/api/deals/1
+curl http://localhost:8000/api/deals/1
 ```
 
 ### `GET /api/stats`
@@ -211,8 +247,80 @@ curl http://localhost:5000/api/deals/1
 Overall statistics across all deals.
 
 ```bash
-curl http://localhost:5000/api/stats
+curl http://localhost:8000/api/stats
 ```
+
+---
+
+## Key Improvements
+
+### 1. Executive Summary Generation
+
+Every analysis now includes an AI-generated executive summary with:
+
+- **Overview**: High-level assessment of the pitch deck
+- **Key Findings**: 3-5 most important discoveries (positive and concerning)
+- **Risk Assessment**: Identified risks based on unverified or disputed claims
+- **Recommendation**: Clear investment decision guidance
+  - "Proceed with Due Diligence"
+  - "Proceed with Caution"
+  - "Do Not Proceed"
+- **Statistics**: Verification metrics and confidence scores
+
+### 2. Enhanced Claims Analysis
+
+**Intelligent Claim Extraction:**
+- AI agent filters out opinions, marketing language, and vague statements
+- Focuses on verifiable, material claims (financial, customer, market, product, team)
+- Categorizes each claim for better organization
+
+**Evidence Quality Filtering:**
+- Blacklists low-quality sources (social media, personal blogs, forums)
+- Prioritizes high-quality sources (Crunchbase, TechCrunch, Bloomberg, SEC filings)
+- Quality scoring system ranks evidence by reliability
+- Requests 2x evidence and filters to top N results
+
+**Filtered Domains:**
+- ❌ Pinterest, Facebook, Twitter, Instagram, YouTube
+- ❌ Reddit, Quora, personal LinkedIn posts
+- ✅ Crunchbase, TechCrunch, Bloomberg, Reuters, WSJ, Forbes
+- ✅ Official SEC filings, news outlets
+
+### 3. Intelligent Investor Questions
+
+**Context-Aware Question Generation:**
+- No more generic "Can you provide supporting documents for" questions
+- Specific, probing questions based on actual analysis findings
+- Prioritizes high-risk areas (disputed claims, low confidence scores)
+- Asks about methodology, data sources, and verification details
+
+**Example Improvements:**
+```
+Before: "Can you provide supporting documents for: We have 500 customers"
+After:  "Regarding 'We have 500 enterprise customers' - can you share specific
+         customer names and contact information for reference checks?"
+
+Before: "Please share revenue breakdown and supporting docs"
+After:  "What is the methodology behind your 300% YoY revenue growth claim?
+         Can you provide monthly revenue data with bank statements?"
+```
+
+### 4. Professional Email Templates
+
+**Enhanced Email Formatting:**
+- Warm, professional tone with context
+- Includes analysis summary statistics
+- Numbered questions for easy reference
+- Offers NDA if needed
+- Emphasizes urgency and momentum
+
+**Structure:**
+1. Greeting and positive acknowledgment
+2. Analysis context (claims analyzed, verification rate)
+3. Numbered questions with clear formatting
+4. Request for supporting documentation
+5. NDA offer and timeline expectations
+6. Professional closing
 
 ---
 

@@ -260,6 +260,11 @@ function displayResults(report) {
         document.getElementById('similarDealsSection').style.display = 'none';
     }
 
+    // Display summary
+    if (report.summary) {
+        displaySummary(report.summary);
+    }
+
     // Display claims
     displayClaims(report.claims);
 
@@ -271,6 +276,59 @@ function displayResults(report) {
 
     // Show results section
     showSection('results');
+}
+
+function displaySummary(summary) {
+    const summaryContent = document.getElementById('summaryContent');
+    summaryContent.innerHTML = '';
+
+    if (!summary) {
+        summaryContent.innerHTML = '<p class="text-secondary">No summary available.</p>';
+        return;
+    }
+
+    const stats = summary.statistics || {};
+    const overview = summary.overview || 'No overview available.';
+    const keyFindings = summary.key_findings || [];
+    const riskAssessment = summary.risk_assessment || 'No risk assessment available.';
+    const recommendation = summary.recommendation || 'No recommendation available.';
+
+    // Determine recommendation class
+    let recommendationClass = 'recommendation-neutral';
+    if (recommendation.toLowerCase().includes('proceed with caution') || recommendation.toLowerCase().includes('do not proceed')) {
+        recommendationClass = 'recommendation-warning';
+    } else if (recommendation.toLowerCase().includes('proceed')) {
+        recommendationClass = 'recommendation-positive';
+    }
+
+    summaryContent.innerHTML = `
+        <div class="summary-section">
+            <h3>Overview</h3>
+            <p class="summary-overview">${overview}</p>
+        </div>
+
+        <div class="summary-section">
+            <h3>Key Findings</h3>
+            <ul class="summary-findings">
+                ${keyFindings.map(finding => `<li>${finding}</li>`).join('')}
+            </ul>
+        </div>
+
+        <div class="summary-section">
+            <h3>Risk Assessment</h3>
+            <p class="summary-risk">${riskAssessment}</p>
+        </div>
+
+        <div class="summary-section">
+            <h3>Recommendation</h3>
+            <div class="summary-recommendation ${recommendationClass}">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>${recommendation}</span>
+            </div>
+        </div>
+    `;
 }
 
 function displayClaims(claims) {
