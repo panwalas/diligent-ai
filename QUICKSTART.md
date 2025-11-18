@@ -218,27 +218,6 @@ rm -rf data/memory.db
 cd web && python server.py
 ```
 
----
-
-## What to Look For (Demo Checklist)
-
-**Seamless Integration (Sago Principle #1):**
-- ✅ Google Drive link works without downloading PDF locally
-- ✅ Tabbed interface (easy to switch input methods)
-- ✅ Clear instructions for sharing Drive files
-- ✅ Works in browser (no CLI knowledge required)
-
-**Hyper-Personalization (Sago Principle #2):**
-- ✅ "Similar Deals from History" section appears after 2nd analysis
-- ✅ Similarity percentage displayed for each match
-- ✅ Shows verification rate comparison (e.g., "80% verified" vs "65% verified")
-- ✅ Each deal automatically stored in memory
-
-**True Agency (Sago Principle #3):**
-- ✅ Automatically verifies all claims (no manual fact-checking)
-- ✅ Generates investor questions without prompting
-- ✅ Composes ready-to-send email
-- ✅ Stores deals in memory without user action
 
 ---
 
