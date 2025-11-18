@@ -50,3 +50,6 @@ htmlcov/
 *.tmp
 tmp/
 temp/
+
+# Memory dumps
+data/memory.db
