@@ -1,4 +1,4 @@
-# Diligent AI — Pitch Deck Verification
+# Diligent AI
 
 **AI-powered due diligence for investors**
 
