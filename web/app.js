@@ -26,6 +26,17 @@ function setupEventListeners() {
     uploadArea.addEventListener('dragleave', handleDragLeave);
     uploadArea.addEventListener('drop', handleDrop);
 
+    // Upload method tabs
+    document.querySelectorAll('.upload-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchUploadMethod(btn.dataset.method));
+    });
+
+    // Google Drive link submission
+    document.getElementById('analyzeDriveBtn')?.addEventListener('click', handleDriveLinkSubmit);
+    document.getElementById('driveLinkInput')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleDriveLinkSubmit();
+    });
+
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
@@ -72,6 +83,86 @@ function handleFile(file) {
     }
 
     processFile(file);
+}
+
+// Upload method switching
+function switchUploadMethod(method) {
+    // Update tab buttons
+    document.querySelectorAll('.upload-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.method === method);
+    });
+
+    // Show/hide upload methods
+    document.getElementById('fileUploadMethod').style.display = method === 'file' ? 'block' : 'none';
+    document.getElementById('driveUploadMethod').style.display = method === 'drive' ? 'block' : 'none';
+}
+
+// Google Drive link handling
+async function handleDriveLinkSubmit() {
+    const driveLink = document.getElementById('driveLinkInput').value.trim();
+
+    if (!driveLink) {
+        alert('Please enter a Google Drive link');
+        return;
+    }
+
+    processDriveLink(driveLink);
+}
+
+async function processDriveLink(driveLink) {
+    const founderEmail = founderEmailInput.value || '';
+    const investorName = investorNameInput.value || 'Investor';
+
+    // Show processing section
+    showSection('processing');
+
+    // Simulate processing steps with animation
+    const steps = [
+        { step: 1, message: 'Downloading PDF from Google Drive...', duration: 2000 },
+        { step: 2, message: 'Identifying claims in pitch deck...', duration: 3000 },
+        { step: 3, message: 'Verifying claims with web evidence...', duration: 4000 },
+        { step: 4, message: 'Generating investor questions...', duration: 2000 }
+    ];
+
+    try {
+        // Start API call
+        const apiPromise = fetch('/api/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                drive_link: driveLink,
+                founder_email: founderEmail,
+                investor_name: investorName
+            })
+        });
+
+        // Animate steps while waiting for API
+        for (const { step, message, duration } of steps) {
+            updateProcessingStep(step, message);
+            await sleep(duration);
+        }
+
+        // Wait for API response
+        const response = await apiPromise;
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `API error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        currentReport = result;
+
+        // Show results
+        displayResults(result);
+
+    } catch (error) {
+        console.error('Error processing Google Drive link:', error);
+        alert(`Error processing pitch deck: ${error.message}`);
+        showSection('upload');
+    }
 }
 
 // API Communication
@@ -161,6 +252,14 @@ function displayResults(report) {
     document.getElementById('unverifiedClaims').textContent = unverified;
     document.getElementById('questionsGenerated').textContent = report.questions.length;
 
+    // Display similar deals if available
+    if (report.similar_deals && report.similar_deals.length > 0) {
+        displaySimilarDeals(report.similar_deals);
+        document.getElementById('similarDealsSection').style.display = 'block';
+    } else {
+        document.getElementById('similarDealsSection').style.display = 'none';
+    }
+
     // Display claims
     displayClaims(report.claims);
 
@@ -242,6 +341,58 @@ function displayQuestions(questions) {
             <div class="question-text">${question}</div>
         `;
         questionsList.appendChild(questionItem);
+    });
+}
+
+function displaySimilarDeals(similarDeals) {
+    const similarDealsList = document.getElementById('similarDealsList');
+    similarDealsList.innerHTML = '';
+
+    if (similarDeals.length === 0) {
+        similarDealsList.innerHTML = '<p class="text-secondary">No similar deals found in history.</p>';
+        return;
+    }
+
+    similarDeals.forEach(deal => {
+        const dealCard = document.createElement('div');
+        dealCard.className = 'similar-deal-card';
+
+        const verificationRate = Math.round((deal.verified_claims / deal.total_claims) * 100);
+        const similarityPercent = Math.round(deal.similarity_score * 100);
+
+        // Format date
+        const analyzedDate = new Date(deal.analyzed_at);
+        const formattedDate = analyzedDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+
+        dealCard.innerHTML = `
+            <div class="similar-deal-header">
+                <div class="similar-deal-title">
+                    <h4>${deal.company_name || 'Unknown Company'}</h4>
+                    <span class="similarity-badge">${similarityPercent}% similar</span>
+                </div>
+                <div class="similar-deal-date">${formattedDate}</div>
+            </div>
+            <div class="similar-deal-stats">
+                <div class="similar-deal-stat">
+                    <span class="stat-label">Claims:</span>
+                    <span class="stat-value">${deal.total_claims}</span>
+                </div>
+                <div class="similar-deal-stat">
+                    <span class="stat-label">Verified:</span>
+                    <span class="stat-value verified">${deal.verified_claims} (${verificationRate}%)</span>
+                </div>
+                <div class="similar-deal-stat">
+                    <span class="stat-label">Avg Confidence:</span>
+                    <span class="stat-value">${Math.round(deal.confidence_avg * 100)}%</span>
+                </div>
+            </div>
+        `;
+
+        similarDealsList.appendChild(dealCard);
     });
 }
 

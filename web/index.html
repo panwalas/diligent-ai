@@ -22,16 +22,59 @@
 
         <!-- Upload Section -->
         <div id="uploadSection" class="section upload-section">
-            <div class="upload-area" id="uploadArea">
-                <svg class="upload-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <h2>Upload Pitch Deck</h2>
-                <p>Drop your PDF here or click to browse</p>
-                <input type="file" id="fileInput" accept=".pdf" hidden>
-                <button class="btn btn-primary" id="browseBtn">Browse Files</button>
+            <!-- Tab Selector for Upload Method -->
+            <div class="upload-tabs">
+                <button class="upload-tab active" data-method="file">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                        <polyline points="13 2 13 9 20 9"></polyline>
+                    </svg>
+                    Upload File
+                </button>
+                <button class="upload-tab" data-method="drive">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Google Drive Link
+                </button>
+            </div>
+
+            <!-- File Upload Method -->
+            <div class="upload-method" id="fileUploadMethod">
+                <div class="upload-area" id="uploadArea">
+                    <svg class="upload-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <h2>Upload Pitch Deck</h2>
+                    <p>Drop your PDF here or click to browse</p>
+                    <input type="file" id="fileInput" accept=".pdf" hidden>
+                    <button class="btn btn-primary" id="browseBtn">Browse Files</button>
+                </div>
+            </div>
+
+            <!-- Google Drive Link Method -->
+            <div class="upload-method" id="driveUploadMethod" style="display: none;">
+                <div class="drive-link-area">
+                    <svg class="upload-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <h2>Paste Google Drive Link</h2>
+                    <p>Share a publicly accessible link to your pitch deck PDF</p>
+                    <div class="input-group drive-input-group">
+                        <input type="text" id="driveLinkInput" placeholder="https://drive.google.com/file/d/YOUR_FILE_ID/view">
+                        <button class="btn btn-primary" id="analyzeDriveBtn">Analyze Deck</button>
+                    </div>
+                    <div class="drive-help">
+                        <p><strong>How to share:</strong></p>
+                        <ol>
+                            <li>Open your pitch deck in Google Drive</li>
+                            <li>Click "Share" → Set to "Anyone with the link can view"</li>
+                            <li>Copy the link and paste it above</li>
+                        </ol>
+                    </div>
+                </div>
             </div>
 
             <div class="options">
@@ -107,6 +150,20 @@
                     <div class="stat-value" id="questionsGenerated">0</div>
                     <div class="stat-label">Questions</div>
                 </div>
+            </div>
+
+            <!-- Similar Deals Section -->
+            <div id="similarDealsSection" class="similar-deals-section" style="display: none;">
+                <div class="section-header">
+                    <h3>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="vertical-align: middle; margin-right: 8px;">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        Similar Deals from History
+                    </h3>
+                    <p class="section-subtitle">Based on claim similarity and verification patterns</p>
+                </div>
+                <div id="similarDealsList" class="similar-deals-list"></div>
             </div>
 
             <!-- Tabs -->
