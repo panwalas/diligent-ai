@@ -5,7 +5,7 @@ import sys
 from .pdf_utils import extract_text_from_pdf, extract_slide_texts
 from .llm_client import LLMClient
 from .verifier import extract_claims_from_text, verify_claims
-from .agent import generate_questions, compose_email, generate_summary
+from .agent import generate_questions, compose_email, generate_summary, generate_pitch_deck_summary
 from .config import load_config
 
 # Configure logging
@@ -45,16 +45,22 @@ def run(pdf_path: str, config_path: str = None, founder_email: str = None, inves
         text = extract_text_from_pdf(pdf_path)
 
         slides = extract_slide_texts(text)
-        logger.info(f"Found {len(slides)} slides (approx). Running claim extraction...")
+        logger.info(f"Found {len(slides)} slides (approx).")
 
+        # Generate pitch deck summary first
+        logger.info("Generating pitch deck summary...")
+        pitch_deck_summary = generate_pitch_deck_summary(text, llm)
+
+        # Extract and verify claims
+        logger.info("Extracting verifiable claims...")
         claims = extract_claims_from_text(text, llm)
-        logger.info(f"Extracted {len(claims)} claims. Verifying...")
+        logger.info(f"Extracted {len(claims)} claims. Verifying with web evidence...")
 
         verified = verify_claims(claims, llm, cfg_path=config_path)
-        logger.info("Verification complete. Generating summary and investor questions...")
+        logger.info("Verification complete. Generating analysis summary...")
 
-        summary = generate_summary(verified, llm)
-        logger.info("Summary generated. Generating questions...")
+        summary = generate_summary(verified, llm, pitch_deck_summary=pitch_deck_summary)
+        logger.info("Generating intelligent investor questions...")
 
         questions = generate_questions(verified, llm, user_profile=cfg.get("user"))
 

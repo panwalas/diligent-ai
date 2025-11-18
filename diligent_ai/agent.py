@@ -3,7 +3,59 @@ import json
 from .llm_client import LLMClient
 
 
-def generate_summary(verified_claims: List[Dict[str, Any]], llm: LLMClient) -> Dict[str, Any]:
+def generate_pitch_deck_summary(text: str, llm: LLMClient) -> Dict[str, Any]:
+    """Generate a summary of the pitch deck content.
+
+    Args:
+        text: Full text extracted from the pitch deck
+        llm: LLM client for generation
+
+    Returns:
+        Dictionary containing: company_name, product, problem, solution, market, traction
+    """
+    prompt = f"""
+You are analyzing a startup pitch deck. Extract and summarize the following information from the pitch deck text below.
+
+Return a JSON object with these keys:
+- company_name: The name of the company (string)
+- product: Brief description of the product/service (1-2 sentences)
+- problem: The problem they're solving (1-2 sentences)
+- solution: How they solve it (1-2 sentences)
+- market: Target market and size if mentioned (1 sentence)
+- traction: Key traction metrics if mentioned (revenue, customers, growth) (1 sentence)
+
+If any field is not clearly mentioned in the deck, use "Not specified" for that field.
+
+Pitch deck text:
+{text[:3000]}
+
+Return ONLY the JSON object, no additional text.
+"""
+
+    try:
+        resp = llm.generate(prompt)
+        data = json.loads(resp)
+        return {
+            "company_name": data.get("company_name", "Not specified"),
+            "product": data.get("product", "Not specified"),
+            "problem": data.get("problem", "Not specified"),
+            "solution": data.get("solution", "Not specified"),
+            "market": data.get("market", "Not specified"),
+            "traction": data.get("traction", "Not specified")
+        }
+    except Exception:
+        # Fallback summary
+        return {
+            "company_name": "Not specified",
+            "product": "Product information could not be extracted from the pitch deck.",
+            "problem": "Not specified",
+            "solution": "Not specified",
+            "market": "Not specified",
+            "traction": "Not specified"
+        }
+
+
+def generate_summary(verified_claims: List[Dict[str, Any]], llm: LLMClient, pitch_deck_summary: Dict[str, Any] = None) -> Dict[str, Any]:
     """Generate an executive summary of the due diligence analysis.
 
     Args:
@@ -65,7 +117,7 @@ Return ONLY the JSON object, no additional text.
     try:
         resp = llm.generate(prompt)
         data = json.loads(resp)
-        return {
+        summary = {
             "overview": data.get("overview", "Analysis complete."),
             "key_findings": data.get("key_findings", []),
             "risk_assessment": data.get("risk_assessment", "Unable to assess risks."),
@@ -80,7 +132,7 @@ Return ONLY the JSON object, no additional text.
         }
     except Exception:
         # Fallback summary
-        return {
+        summary = {
             "overview": f"Analyzed {total_claims} claims from the pitch deck with an average confidence of {avg_confidence:.2%}.",
             "key_findings": [
                 f"{verified_count} claims verified with supporting evidence",
@@ -97,6 +149,12 @@ Return ONLY the JSON object, no additional text.
                 "average_confidence": round(avg_confidence, 2)
             }
         }
+
+    # Add pitch deck summary if available
+    if pitch_deck_summary:
+        summary["pitch_deck"] = pitch_deck_summary
+
+    return summary
 
 
 def generate_questions(verified_claims: List[Dict[str, Any]], llm: LLMClient, user_profile: Dict[str, Any] = None) -> List[str]:
@@ -207,29 +265,59 @@ def compose_email(questions: List[str], founder_email: str, investor_name: str, 
     Returns:
         Formatted email template
     """
-    # Format questions with numbering
-    formatted_questions = "\n".join([f"{i+1}. {q}" for i, q in enumerate(questions)])
+    # Filter and format questions
+    valid_questions = []
+    for q in questions:
+        # Skip very long questions that might be malformed
+        if len(q) < 500 and not q.startswith("We couldn't verify"):
+            valid_questions.append(q)
+
+    # If no valid questions, add default ones
+    if not valid_questions:
+        valid_questions = [
+            "Could you provide recent financial statements (P&L, balance sheet) for the last 12 months?",
+            "Can you share customer references or case studies for your key clients?",
+            "What are your detailed revenue projections for the next 12-24 months, including key assumptions?"
+        ]
+
+    formatted_questions = "\n".join([f"{i+1}. {q}" for i, q in enumerate(valid_questions)])
 
     # Include summary context if available
     context = ""
-    if summary and summary.get("statistics"):
-        stats = summary["statistics"]
-        verified_pct = (stats["verified"] / max(stats["total_claims"], 1)) * 100
-        context = f"\nWe have completed our initial analysis of your pitch deck, reviewing {stats['total_claims']} key claims. Our analysis found that {stats['verified']} claims could be verified with public information ({verified_pct:.0f}%), while {stats['unverified']} claims require additional documentation.\n"
+    company_intro = ""
+
+    if summary:
+        # Add pitch deck summary
+        if summary.get("pitch_deck"):
+            pd = summary["pitch_deck"]
+            if pd.get("company_name") and pd["company_name"] != "Not specified":
+                company_intro = f"\n\nRegarding {pd['company_name']}: "
+                if pd.get("product") and pd["product"] != "Not specified":
+                    company_intro += f"{pd['product']}"
+
+        # Add statistics
+        if summary.get("statistics"):
+            stats = summary["statistics"]
+            if stats["total_claims"] > 0:
+                verified_pct = (stats["verified"] / stats["total_claims"]) * 100
+                context = f"\n\nWe've completed our initial review of your pitch deck and analyzed {stats['total_claims']} key claims. We were able to verify {stats['verified']} claims ({verified_pct:.0f}%) through public sources, while {stats['unverified']} claims would benefit from additional documentation."
 
     template = f"""Dear Founder,
 
-Thank you for sharing your pitch deck with us. We are impressed by your vision and progress to date.
-{context}
-To move forward with our due diligence process, we would appreciate your responses to the following questions:
+Thank you for taking the time to share your pitch deck with us.{company_intro}{context}
+
+To help us move forward with our evaluation, we'd appreciate your responses to the following questions:
 
 {formatted_questions}
 
-Please provide your responses along with any supporting documentation (financial statements, customer contracts, partnership agreements, etc.) at your earliest convenience.
+Please include any supporting documentation such as:
+• Financial statements (P&L, balance sheet, cash flow)
+• Customer contracts or letters of intent
+• Partnership agreements
+• Team bios and relevant credentials
+• Any other materials you feel would be helpful
 
-We understand that some of this information may be confidential, and we are happy to execute an NDA if needed. We aim to move quickly and efficiently through our process, and your timely responses will help us maintain momentum.
-
-Looking forward to your reply.
+We understand some information may be confidential and are happy to execute an NDA. We aim to move efficiently through our process, and your timely response will help maintain momentum.
 
 Best regards,
 {investor_name}

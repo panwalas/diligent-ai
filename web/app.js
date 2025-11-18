@@ -301,9 +301,28 @@ function displaySummary(summary) {
         recommendationClass = 'recommendation-positive';
     }
 
+    // Build pitch deck summary section if available
+    let pitchDeckSection = '';
+    if (summary.pitch_deck) {
+        const pd = summary.pitch_deck;
+        pitchDeckSection = `
+            <div class="summary-section pitch-deck-section">
+                <h3>Pitch Deck Summary</h3>
+                ${pd.company_name && pd.company_name !== 'Not specified' ? `<p><strong>Company:</strong> ${pd.company_name}</p>` : ''}
+                ${pd.product && pd.product !== 'Not specified' ? `<p><strong>Product:</strong> ${pd.product}</p>` : ''}
+                ${pd.problem && pd.problem !== 'Not specified' ? `<p><strong>Problem:</strong> ${pd.problem}</p>` : ''}
+                ${pd.solution && pd.solution !== 'Not specified' ? `<p><strong>Solution:</strong> ${pd.solution}</p>` : ''}
+                ${pd.market && pd.market !== 'Not specified' ? `<p><strong>Market:</strong> ${pd.market}</p>` : ''}
+                ${pd.traction && pd.traction !== 'Not specified' ? `<p><strong>Traction:</strong> ${pd.traction}</p>` : ''}
+            </div>
+        `;
+    }
+
     summaryContent.innerHTML = `
+        ${pitchDeckSection}
+
         <div class="summary-section">
-            <h3>Overview</h3>
+            <h3>Analysis Overview</h3>
             <p class="summary-overview">${overview}</p>
         </div>
 

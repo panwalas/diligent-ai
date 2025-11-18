@@ -785,6 +785,21 @@ body {
     flex-shrink: 0;
 }
 
+.pitch-deck-section {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border-left: 4px solid var(--primary);
+}
+
+.pitch-deck-section p {
+    margin: 0.75rem 0;
+    line-height: 1.6;
+}
+
+.pitch-deck-section strong {
+    color: var(--primary);
+    margin-right: 0.5rem;
+}
+
 @media (max-width: 768px) {
     .options {
         grid-template-columns: 1fr;
