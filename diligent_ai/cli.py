@@ -4,9 +4,8 @@ import logging
 import sys
 from .pdf_utils import extract_text_from_pdf, extract_slide_texts
 from .llm_client import LLMClient
-from .verifier import extract_claims_from_text, verify_claims
-from .agent import generate_questions, compose_email, generate_summary, generate_pitch_deck_summary
 from .config import load_config
+from .workflow import run_workflow
 
 # Configure logging
 logging.basicConfig(
@@ -47,31 +46,24 @@ def run(pdf_path: str, config_path: str = None, founder_email: str = None, inves
         slides = extract_slide_texts(text)
         logger.info(f"Found {len(slides)} slides (approx).")
 
-        # Generate pitch deck summary first
-        logger.info("Generating pitch deck summary...")
-        pitch_deck_summary = generate_pitch_deck_summary(text, llm)
+        logger.info("Running LangGraph workflow for analysis...")
+        logger.info("Step 1: Generating pitch deck summary...")
+        logger.info("Step 2: Extracting verifiable claims...")
+        logger.info("Step 3: Verifying claims with SerpAPI evidence...")
+        logger.info("Step 4: Generating intelligent questions...")
+        logger.info("Step 5: Composing email template...")
+        logger.info("Step 6: Creating executive summary...")
 
-        # Extract and verify claims
-        logger.info("Extracting verifiable claims...")
-        claims = extract_claims_from_text(text, llm)
-        logger.info(f"Extracted {len(claims)} claims. Verifying with web evidence...")
+        # Run the LangGraph workflow
+        report = run_workflow(
+            text=text,
+            llm=llm,
+            config_path=config_path,
+            founder_email=founder_email,
+            investor_name=investor_name
+        )
 
-        verified = verify_claims(claims, llm, cfg_path=config_path)
-        logger.info("Verification complete. Generating analysis summary...")
-
-        summary = generate_summary(verified, llm, pitch_deck_summary=pitch_deck_summary)
-        logger.info("Generating intelligent investor questions...")
-
-        questions = generate_questions(verified, llm, user_profile=cfg.get("user"))
-
-        email = compose_email(questions, founder_email or "founder@example.com", investor_name, summary=summary)
-
-        report = {
-            "summary": summary,
-            "claims": verified,
-            "questions": questions,
-            "email": email
-        }
+        logger.info("Workflow complete!")
 
         # Output JSON to stdout (only when running from CLI)
         if print_output:
