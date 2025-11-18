@@ -341,7 +341,7 @@ def get_stats():
 
 if __name__ == '__main__':
     # Get port from environment or use default
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 8000))
 
     logger.info(f"Starting Diligent AI web server on port {port}")
     logger.info(f"Open http://localhost:{port} in your browser")
